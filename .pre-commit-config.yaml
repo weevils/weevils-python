@@ -1,0 +1,35 @@
+# https://pre-commit.com/
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      # tidy up extra whitespace at end of files
+      - id: trailing-whitespace
+      # ensure consistent newline endings for files (\n only)
+      - id: end-of-file-fixer
+      # fix newlines in general to prevent pesky windows users writing CRLF
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      # do not allow pdb/breakpoint statements to be checked in
+      - id: debug-statements
+  # code formatting
+#  - repo: https://github.com/PyCQA/prospector
+#    rev: 1.8.0rc1
+#    hooks:
+#      - id: prospector
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.2
+    hooks:
+      - id: flake8
+        args: [ --max-line-length=120, --extend-exclude='**/migrations/*.py' ]
+  - repo: https://github.com/python/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        args: [--safe, --line-length=120]
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1
+    hooks:
+      - id: isort
+        exclude: migrations
+        args: ["--profile", "black", "--filter-files"]

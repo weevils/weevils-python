@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "weevils"
+version = "0.1.0"
+description = ""
+authors = ["Weevils <code@weevils.io>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+requests = "^2.12"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.1"
+pre-commit = "^2.18.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
