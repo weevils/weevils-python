@@ -1,14 +1,14 @@
 import os
 
 from .client import WeevilsClient
-from .exceptions import WeevilsConfigurationError
+from .exceptions import WeevilsAPIException, WeevilsConfigurationError
 
 
 def from_env() -> WeevilsClient:
     token = os.environ.get("WEEVILS_API_TOKEN")
     if token is None:
         raise WeevilsConfigurationError(
-            "When configuring from environment variables, the WEEVILS_API_TOKEN "
+            "When configuring from environment variables, WEEVILS_API_TOKEN "
             "must be set and contain a valid API token for weevils.io"
         )
 
@@ -19,5 +19,6 @@ def from_env() -> WeevilsClient:
 __all__ = (
     "WeevilsClient",
     "WeevilsConfigurationError",
+    "WeevilsAPIException",
     "from_env",
 )
