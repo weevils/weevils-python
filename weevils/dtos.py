@@ -26,9 +26,4 @@ class Job:
     weevil_id: UUID
 
 
-__all__ = (
-    'Host',
-    'Job',
-    'Repository',
-    'Weevil'
-)
+__all__ = ("Host", "Job", "Repository", "Weevil")

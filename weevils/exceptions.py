@@ -1,3 +1,2 @@
-
 class WeevilsConfigurationError(Exception):
     pass
