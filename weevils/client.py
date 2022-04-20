@@ -31,12 +31,16 @@ class WeevilsClient:
             self.user_agent = user_agent
 
     def _request(
-        self, method: str, path: str, accept_status=None, *, query: Dict[str, Any] = None, data: Dict[str, Any] = None
+        self, method: str, path: str, accept_status=(), *, query: Dict[str, Any] = None, data: Dict[str, Any] = None
     ) -> Response:
 
-        accept_status = accept_status or ()
         url = urljoin(self._base_url, path.lstrip("/"))
-        headers = {"User-Agent": self.user_agent, "Authorization": f"Bearer {self._token}"}
+        headers = {
+            "User-Agent": self.user_agent,
+            "Authorization": f"Token {self._token}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        }
         resp = self._session.request(method, url, params=query, data=data, headers=headers)
         if resp.status_code not in accept_status:
             raise WeevilsAPIException(resp)
@@ -57,7 +61,7 @@ class WeevilsClient:
         return [Weevil(**weev) for weev in resp.json()]
 
     def run(self, weevil_id: UUID, owner: str, name: str) -> Job:
-        resp = self._post(f"weevils/{weevil_id}/run-once", data={"host": "gitea", "owner": str, "name": str})  # TODO
+        resp = self._post(f"weevils/{weevil_id}/run-once", data={"host": "gitea", "owner": owner, "name": name})  # TODO
         return Job(**resp.json())
 
     # ----------------------

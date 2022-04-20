@@ -9,8 +9,8 @@ class Host:
 
 @dataclass
 class Weevil:
-    id = UUID
-    name = str
+    id: UUID
+    name: str
 
 
 @dataclass
@@ -24,6 +24,8 @@ class Repository:
 class Job:
     id: UUID
     weevil_id: UUID
+
+    results: str = None
 
 
 __all__ = ("Host", "Job", "Repository", "Weevil")
