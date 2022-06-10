@@ -1,12 +1,23 @@
+import pytest
+
 from weevils import WeevilsClient
 
 
-def test_list_weevils(client: WeevilsClient):
-    weevils = client.get_weevils()
-    assert len(weevils) > 0
-    assert weevils[0].name == client.get_weevil(weevils[0].id).name
+def test_host_shortcuts(client: WeevilsClient):
+    # test shorthands
+    gh = client.github
+    assert gh is not None
+    assert gh.name == "GitHub"
 
 
-def test_create_oneoff_job(client: WeevilsClient):
+def test_fetching_hosts(client: WeevilsClient):
+    # test regular lookup by ID and slug
+    for host in client.list_hosts():
+        assert client.get_host(host.slug) is not None
+        assert client.get_host(host.id) is not None
 
-    client.run()
+
+def test_bad_arguments(client: WeevilsClient):
+    with pytest.raises(ValueError):
+        client.get_host(None)
+        client.get_host("")

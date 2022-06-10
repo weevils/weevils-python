@@ -12,8 +12,8 @@ def from_env() -> WeevilsClient:
             "must be set and contain a valid API token for weevils.io"
         )
 
-    api_url = os.environ.get("WEEVILS_URL")
-    return WeevilsClient(token, api_url)
+    api_url = os.environ.get("WEEVILS_API_URL")
+    return WeevilsClient(token, api_url=api_url)
 
 
 __all__ = (
