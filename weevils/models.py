@@ -4,7 +4,7 @@
 # modelled on github3.py
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Union
 from urllib.parse import urljoin
 from uuid import UUID
 
@@ -39,6 +39,13 @@ class WeevilsCore(ABC):
     def _post(self, path: str, data: Data = None) -> Response:
         return self._request("POST", path, accept_status=(HTTPStatus.OK, HTTPStatus.CREATED), data=data)
 
+    def _make_obj(self, model_cls, data: Union[Data, Response]) -> "WeevilsCore":
+        if isinstance(data, Response):
+            data = data.json()
+        if not isinstance(data, dict):
+            raise ValueError(f"Can't handle data structure {data}")
+        return model_cls(data, self)
+
     @abstractmethod
     def _from_dict(self, data: Data):
         ...
@@ -57,12 +64,36 @@ class GitHost(WeevilsCore):
         self.private = data["private"]
 
     def repository(self, owner_name: str, name: str) -> "Repository":
-        resp = self._get(f"{self.id}/repos/{owner_name}/{name}")
-        return Repository(resp.json(), self)
+        return self._make_obj(Repository, self._get(f"hosts/{self.slug}/repos/{owner_name}/{name}/"))
 
     def repository_by_id(self, repository_id: UUID) -> "Repository":
-        resp = self._get(f"{self.id}/repos/{repository_id}")
-        return Repository(resp.json(), self)
+        return self._make_obj(Repository, self._get(f"hosts/{self.slug}/repos/{repository_id}/"))
+
+
+class Job(WeevilsCore):
+    id: UUID
+    results: str
+    status: Optional[str]
+
+    def _from_dict(self, data: Data):
+        self.id = UUID(data["id"])
+        self.status = data["status"]
+        self.results = data["results"]
+
+
+class Weevil(WeevilsCore):
+    id: UUID
+    name: str
+
+    def _from_dict(self, data: Data):
+        self.id = UUID(data["id"])
+        self.name = data["name"]
+
+    def run(self, repository_id: UUID) -> Job:
+        return self._make_obj(Job, self._post(f"weevils/{self.id}/run/{repository_id}/"))
+
+    def watch(self, repository_id: UUID):
+        pass
 
 
 class Account(WeevilsCore):
@@ -81,4 +112,5 @@ class Repository(WeevilsCore):
 
     def _from_dict(self, data: Data):
         self.id = UUID(data["id"])
-        self.owner = Account(data["owner"], self)
+        self.owner = self._make_obj(Account, data["owner"])
+        self.host = self._make_obj(GitHost, data["host"])

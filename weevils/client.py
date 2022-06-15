@@ -4,13 +4,20 @@ from uuid import UUID
 import pkg_resources
 from requests.sessions import Session
 
-from .models import GitHost, WeevilsCore
+from .models import GitHost, Job, Weevil, WeevilsCore
 
 VERSION = pkg_resources.get_distribution("weevils").version
 
 
 class WeevilsClient(WeevilsCore):
     def __init__(self, token: str, *, api_url: str = None, user_agent: str = None, session: Session = None):
+        """
+
+        :param token:
+        :param api_url:
+        :param user_agent:
+        :param session:
+        """
         self._token = token
 
         api_url = api_url or self.api_url
@@ -50,13 +57,12 @@ class WeevilsClient(WeevilsCore):
         :return:
             A list of all hosts with which the current Weevils account can interact
         """
-        return [GitHost(host, self) for host in self._get("/hosts").json()]
+        return [self._make_obj(GitHost, host_data) for host_data in self._get("hosts/").json()]
 
     def get_host(self, slug_or_pk: Union[str, UUID]) -> GitHost:
         if not slug_or_pk:
             raise ValueError("Must specify a host ID or slug")
-        data = self._get(f"/hosts/{slug_or_pk}").json()
-        return GitHost(data, self)
+        return self._make_obj(GitHost, self._get(f"hosts/{slug_or_pk}/"))
 
     # shortcuts:
 
@@ -71,6 +77,24 @@ class WeevilsClient(WeevilsCore):
         if self._bitbucket is None:
             self._bitbucket = self.get_host("bitbucket")
         return self._bitbucket
+
+    # ---
+    # Weevil methods
+    # ---
+
+    def get_weevil(self, weevil_id: UUID) -> Weevil:
+        return self._make_obj(Weevil, self._get(f"weevils/{weevil_id}/"))
+
+    def list_weevils(self) -> List[Weevil]:
+        resp = self._get("weevils/")
+        return [self._make_obj(Weevil, weev) for weev in resp.json()]
+
+    # ---
+    # Job methods
+    # ---
+
+    def get_job(self, job_id: UUID) -> Job:
+        return self._make_obj(Job, self._get(f"jobs/{job_id}/"))
 
     # ---
     # Repository methods
@@ -118,22 +142,6 @@ class WeevilsClient(WeevilsCore):
     #     repo = self.get_repository_by_name(host, owner_name, name, weevil_id=weevil_id)
     #     return self.watch_repository_by_id(repo.id)
 
-    # ---
-    # Weevil methods
-    # ---
-
-    # def get_weevil(self, weevil_id: UUID) -> Weevil:
-    #     resp = self._get(f"weevils/{weevil_id}/")
-    #     return Weevil(**resp.json())
-    #
-    # def get_weevils(self) -> Iterable[Weevil]:
-    #     resp = self._get("weevils/")
-    #     return [Weevil(**weev) for weev in resp.json()]
-    #
-    # def run(self, weevil_id: UUID, owner: str, name: str) -> Job:
-    #     resp = self._post(f"weevils/{weevil_id}/run-once", data
-    #     ={"host": "gitea", "owner": owner, "name": name})  # TODO
-    #     return Job(**resp.json())
     #
     # # ----------------------
     # # TODO
