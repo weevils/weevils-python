@@ -8,13 +8,9 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urljoin
 from uuid import UUID
 
-import pkg_resources
 from requests import Response
 
 from .exceptions import WeevilsAPIException
-
-VERSION = pkg_resources.get_distribution("weevils").version
-
 
 Data = Dict[str, Any]
 
@@ -48,7 +44,7 @@ class WeevilsCore(ABC):
 
     @abstractmethod
     def _from_dict(self, data: Data):
-        ...
+        raise NotImplementedError
 
 
 class GitHost(WeevilsCore):
@@ -81,21 +77,6 @@ class Job(WeevilsCore):
         self.results = data["results"]
 
 
-class Weevil(WeevilsCore):
-    id: UUID
-    name: str
-
-    def _from_dict(self, data: Data):
-        self.id = UUID(data["id"])
-        self.name = data["name"]
-
-    def run(self, repository_id: UUID) -> Job:
-        return self._make_obj(Job, self._post(f"weevils/{self.id}/run/{repository_id}/"))
-
-    def watch(self, repository_id: UUID):
-        pass
-
-
 class Account(WeevilsCore):
     id: UUID
     name: str
@@ -114,3 +95,19 @@ class Repository(WeevilsCore):
         self.id = UUID(data["id"])
         self.owner = self._make_obj(Account, data["owner"])
         self.host = self._make_obj(GitHost, data["host"])
+
+
+class Weevil(WeevilsCore):
+    id: UUID
+    name: str
+
+    def _from_dict(self, data: Data):
+        self.id = UUID(data["id"])
+        self.name = data["name"]
+
+    def run(self, repository: Union[UUID, Repository]) -> Job:
+        repository_id = getattr(repository, "id", repository)
+        return self._make_obj(Job, self._post(f"weevils/{self.id}/run/{repository_id}/"))
+
+    def watch(self, repository_id: UUID):
+        pass

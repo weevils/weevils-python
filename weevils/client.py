@@ -7,16 +7,31 @@ from requests.sessions import Session
 from .models import GitHost, Job, Weevil, WeevilsCore
 
 VERSION = pkg_resources.get_distribution("weevils").version
+DEFAULT_USER_AGENT = f"Weevils Client v{VERSION}"
+
+WEEVILS_API = "https://api.weevils.io"
+WEEVILS_SANDBOX_API = "https://api.sandbox.weevils.io"
 
 
 class WeevilsClient(WeevilsCore):
-    def __init__(self, token: str, *, api_url: str = None, user_agent: str = None, session: Session = None):
+    def __init__(
+        self, token: str, *, api_url: str = WEEVILS_API, user_agent: str = DEFAULT_USER_AGENT, session: Session = None
+    ):
         """
+        Required parameters:
 
         :param token:
+            The API token made at https://weevils.io/tokens to access the API
+
+        Optional parameters:
+
         :param api_url:
+            The base API URL. The default is for live weevils.io but you can switch this to the sandbox URL
+            for testing and development
         :param user_agent:
+            Override the default user agent to send in requests
         :param session:
+            Use this to override the default requests Session object
         """
         self._token = token
 
@@ -30,7 +45,7 @@ class WeevilsClient(WeevilsCore):
         # set default headers including auth
         self._session.headers.update(
             {
-                "User-Agent": user_agent or f"Weevils Client v{VERSION}",
+                "User-Agent": user_agent,
                 "Authorization": f"Token {self._token}",
                 "Accept": "application/json",
                 "Content-Type": "application/json",
@@ -149,3 +164,17 @@ class WeevilsClient(WeevilsCore):
     #     pass
 
     # def watch(self. ###):
+
+
+class WeevilsSandboxClient(WeevilsClient):
+    """
+    This is a convenient shortcut class to get a client pointing at the Weevils sandbox
+    API.
+
+    Note: Using the `from_env` class and setting environment variables is a better method
+    for easily switching using environment variables rather than needing to have logic in
+    the code to choose a client class
+    """
+
+    def __init__(self, token: str, *, user_agent: str = None, session: Session = None):
+        super().__init__(token, api_url=WEEVILS_SANDBOX_API, session=session, user_agent=user_agent)
