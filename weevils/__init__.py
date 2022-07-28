@@ -1,6 +1,6 @@
 import os
 
-from .client import WeevilsClient, WeevilsSandboxClient
+from .client import WEEVILS_API, WeevilsClient, WeevilsSandboxClient
 from .exceptions import WeevilsAPIException, WeevilsConfigurationError
 
 
@@ -12,7 +12,7 @@ def from_env() -> WeevilsClient:
             "must be set and contain a valid API token for weevils.io"
         )
 
-    api_url = os.environ.get("WEEVILS_API_URL")
+    api_url = os.environ.get("WEEVILS_API_URL") or WEEVILS_API
     return WeevilsClient(token, api_url=api_url)
 
 

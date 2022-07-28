@@ -4,7 +4,7 @@ from uuid import UUID
 import pkg_resources
 from requests.sessions import Session
 
-from .models import GitHost, Job, Weevil, WeevilsCore
+from .models import GitHost, Job, Weevil, WeevilBase, WeevilsCore
 
 VERSION = pkg_resources.get_distribution("weevils").version
 DEFAULT_USER_AGENT = f"Weevils Client v{VERSION}"
@@ -96,6 +96,25 @@ class WeevilsClient(WeevilsCore):
     # ---
     # Weevil methods
     # ---
+
+    def create_weevil(self, name: str, base: Union[UUID, WeevilBase], script: str, *, slug: str = None) -> Weevil:
+        base_id = base if isinstance(base, UUID) else base.id
+        data = {"name": name, "base_id": str(base_id), "script": script}
+        if slug:
+            # TODO: some validation here to reject bad slugs before the server has to
+            data["slug"] = slug
+
+        resp = self._post("weevils/", data=data)
+        return self._make_obj(Weevil, resp.json())
+
+    def update_weevil(self, weevil: Union[UUID, Weevil], script: str) -> Weevil:
+        weevil_id = weevil if isinstance(weevil, UUID) else weevil.id
+        resp = self._post(f"weevils/{weevil_id}/", data={"script": script})
+        return self._make_obj(Weevil, resp.json())
+
+    def list_bases(self) -> WeevilBase:
+        resp = self._get("weevils/bases")
+        return [self._make_obj(WeevilBase, base) for base in resp.json()]
 
     def get_weevil(self, weevil_id: UUID) -> Weevil:
         return self._make_obj(Weevil, self._get(f"weevils/{weevil_id}/"))

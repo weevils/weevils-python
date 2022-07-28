@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 from betamax import Betamax
-from requests import Session
 
 from weevils import WeevilsClient
 
@@ -28,6 +27,6 @@ def client(betamax_session) -> WeevilsClient:
     api_url = os.environ.get("WEEVILS_CLIENT_TEST_API", "https://api.weevils.io")
 
     # use the betamax cassettes if we are not talking to a local weevils system
-    session = Session() if api_url else betamax_session
+    # session = Session() if api_url else betamax_session
 
-    yield WeevilsClient(token, api_url=api_url, session=session)
+    yield WeevilsClient(token, api_url=api_url, session=betamax_session)
