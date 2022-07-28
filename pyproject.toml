@@ -1,9 +1,23 @@
 [tool.poetry]
 name = "weevils"
 version = "0.0.1alpha"
+license = "GPLv3"
+authors = ["weevils.io <code@weevils.io>"]
+homepage = "https://docs.weevils.io/api-client"
 description = ""
-authors = ["Weevils <code@weevils.io>"]
-license = "MIT"
+packages = [{ include = "weevils/"}]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+]
+include = [
+    "LICENSE",
+    "README.md"
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
