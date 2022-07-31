@@ -1,7 +1,7 @@
 import os
 
 from .client import WEEVILS_API, WeevilsClient, WeevilsSandboxClient
-from .exceptions import WeevilsAPIException, WeevilsConfigurationError
+from .exceptions import WeevilsConfigurationError
 
 
 def from_env() -> WeevilsClient:
@@ -19,7 +19,5 @@ def from_env() -> WeevilsClient:
 __all__ = (
     "WeevilsClient",
     "WeevilsSandboxClient",
-    "WeevilsConfigurationError",
-    "WeevilsAPIException",
     "from_env",
 )

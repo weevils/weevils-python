@@ -35,6 +35,9 @@ class WeevilsCore(ABC):
     def _post(self, path: str, data: Data = None) -> Response:
         return self._request("POST", path, accept_status=(HTTPStatus.OK, HTTPStatus.CREATED), data=data)
 
+    def _delete(self, path: str) -> Response:
+        return self._request("DELETE", path, accept_status=(HTTPStatus.OK,))
+
     def _make_obj(self, model_cls, data: Union[Data, Response]) -> "WeevilsCore":
         if isinstance(data, Response):
             data = data.json()
@@ -80,17 +83,6 @@ class GitHost(WeevilsCore):
         return self._make_repository(f"hosts/{self.slug}/repos/{repository_id}/")
 
 
-class Job(WeevilsCore):
-    id: UUID
-    output: str
-    status: Optional[str]
-
-    def _from_dict(self, data: Data):
-        self.id = UUID(data["id"])
-        self.status = data["status"]
-        self.output = data["output"]
-
-
 class Account(WeevilsCore):
     id: UUID
     name: str
@@ -104,11 +96,26 @@ class Repository(WeevilsCore):
     id: UUID
     owner: Account
     host: GitHost
+    private: bool
 
     def _from_dict(self, data: Data):
         self.id = UUID(data["id"])
         self.owner = self._make_obj(Account, data["owner"])
         self.host = self._make_obj(GitHost, data["host"])
+        self.private = data["private"]
+
+
+class Job(WeevilsCore):
+    id: UUID
+    output: str
+    status: Optional[str]
+    repository: Repository
+
+    def _from_dict(self, data: Data):
+        self.id = UUID(data["id"])
+        self.status = data["status"]
+        self.output = data["output"]
+        self.repository = self._make_obj(Repository, data["repository"])
 
 
 class WeevilBase(WeevilsCore):
@@ -126,11 +133,13 @@ class Weevil(WeevilsCore):
     id: UUID
     name: str
     slug: str
+    script: str
 
     def _from_dict(self, data: Data):
         self.id = UUID(data["id"])
         self.name = data["name"]
         self.slug = data["slug"]
+        self.script = data["script"]
 
     def run(self, repository: Union[UUID, Repository]) -> Job:
         if repository is None:

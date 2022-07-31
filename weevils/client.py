@@ -1,3 +1,4 @@
+import sys
 from typing import List, Union
 from uuid import UUID
 
@@ -7,7 +8,9 @@ from requests.sessions import Session
 from .models import GitHost, Job, Weevil, WeevilBase, WeevilsCore
 
 VERSION = pkg_resources.get_distribution("weevils").version
-DEFAULT_USER_AGENT = f"Weevils Client v{VERSION}"
+
+_python_version = ".".join(str(v) for v in sys.version_info[:2])
+DEFAULT_USER_AGENT = f"Weevils Client v{VERSION} ({_python_version})"
 
 WEEVILS_API = "https://api.weevils.io"
 WEEVILS_SANDBOX_API = "https://api.sandbox.weevils.io"
@@ -26,7 +29,7 @@ class WeevilsClient(WeevilsCore):
         Optional parameters:
 
         :param api_url:
-            The base API URL. The default is for live weevils.io but you can switch this to the sandbox URL
+            The base API URL. The default is for live weevils.io, but you can switch this to the sandbox URL
             for testing and development
         :param user_agent:
             Override the default user agent to send in requests
