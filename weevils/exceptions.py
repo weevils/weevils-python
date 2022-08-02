@@ -15,3 +15,8 @@ class WeevilsAPIException(Exception):
 class EntityNotFound(Exception):
     def __init__(self, entity_type: str, criteria: str):
         super().__init__(f"Could not find entity of type {entity_type} with criteria {criteria}")
+
+
+class WeevilsAPIConnectionError(Exception):
+    def __init__(self, api_url: str):
+        super().__init__(f"Could not connect to the Weevils API at {api_url}")

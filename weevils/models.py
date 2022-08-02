@@ -9,14 +9,15 @@ from urllib.parse import urljoin
 from uuid import UUID
 
 from requests import Response
+from requests.exceptions import ConnectionError
 
-from .exceptions import EntityNotFound, WeevilsAPIException
+from .exceptions import EntityNotFound, WeevilsAPIConnectionError, WeevilsAPIException
 
 Data = Dict[str, Any]
 
 
 class WeevilsCore(ABC):
-    def __init__(self, data: Data, parent_obj: "WeevilsCore" = None):
+    def __init__(self, data: Data, parent_obj: "WeevilsCore"):
         self._session = parent_obj._session
         self._base_url = parent_obj._base_url
         self._from_dict(data)
@@ -24,7 +25,11 @@ class WeevilsCore(ABC):
 
     def _request(self, method: str, path: str, accept_status=(), *, query: Data = None, data: Data = None) -> Response:
         url = urljoin(self._base_url, path.lstrip("/"))
-        resp = self._session.request(method, url, params=query, json=data)
+        try:
+            resp = self._session.request(method, url, params=query, json=data)
+        except ConnectionError as ex:
+            raise WeevilsAPIConnectionError(self._base_url) from ex
+
         if resp.status_code not in accept_status:
             raise WeevilsAPIException(resp)
         return resp
