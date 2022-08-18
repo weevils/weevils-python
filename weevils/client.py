@@ -1,10 +1,12 @@
 import sys
+from http import HTTPStatus
 from typing import List, Union
 from uuid import UUID
 
 import pkg_resources
 from requests.sessions import Session
 
+from .exceptions import EntityConflict, EntityNotFound, WeevilsAPIException
 from .models import GitHost, Job, Weevil, WeevilBase, WeevilsCore
 
 VERSION = pkg_resources.get_distribution("weevils").version
@@ -80,7 +82,12 @@ class WeevilsClient(WeevilsCore):
     def get_host(self, slug_or_pk: Union[str, UUID]) -> GitHost:
         if not slug_or_pk:
             raise ValueError("Must specify a host ID or slug")
-        return self._make_obj(GitHost, self._get(f"hosts/{slug_or_pk}/"))
+        try:
+            return self._make_obj(GitHost, self._get(f"hosts/{slug_or_pk}/"))
+        except WeevilsAPIException as ex:
+            if ex.status_code == HTTPStatus.NOT_FOUND:
+                raise EntityNotFound("host", slug_or_pk)
+            raise
 
     # shortcuts:
 
@@ -107,7 +114,10 @@ class WeevilsClient(WeevilsCore):
             # TODO: some validation here to reject bad slugs before the server has to
             data["slug"] = slug
 
-        resp = self._post("weevils/", data=data)
+        resp = self._post("weevils/", data=data, handled_status=(HTTPStatus.CONFLICT,))
+        if resp.status_code == HTTPStatus.CONFLICT:
+            raise EntityConflict(resp.json()["error"])
+
         return self._make_obj(Weevil, resp.json())
 
     def update_weevil(self, weevil: Union[UUID, Weevil], script: str) -> Weevil:

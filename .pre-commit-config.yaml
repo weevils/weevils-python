@@ -27,8 +27,8 @@ repos:
     hooks:
       - id: black
         args: [--safe, --line-length=120]
-  - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.10.1
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
     hooks:
       - id: isort
         exclude: migrations

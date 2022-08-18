@@ -4,7 +4,7 @@
 # modelled on github3.py
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union
 from urllib.parse import urljoin
 from uuid import UUID
 
@@ -23,25 +23,27 @@ class WeevilsCore(ABC):
         self._from_dict(data)
         self._data = data
 
-    def _request(self, method: str, path: str, accept_status=(), *, query: Data = None, data: Data = None) -> Response:
+    def _request(self, method: str, path: str, allow_status=(), *, query: Data = None, data: Data = None) -> Response:
         url = urljoin(self._base_url, path.lstrip("/"))
         try:
             resp = self._session.request(method, url, params=query, json=data)
         except ConnectionError as ex:
             raise WeevilsAPIConnectionError(self._base_url) from ex
 
-        if resp.status_code not in accept_status:
+        if resp.status_code not in allow_status:
             raise WeevilsAPIException(resp)
         return resp
 
-    def _get(self, path: str, query: Data = None) -> Response:
-        return self._request("GET", path, accept_status=(HTTPStatus.OK,), query=query)
+    def _get(self, path: str, query: Data = None, *, handled_status: Tuple[int] = ()) -> Response:
+        allow_status = (HTTPStatus.OK,) + handled_status
+        return self._request("GET", path, allow_status=allow_status, query=query)
 
-    def _post(self, path: str, data: Data = None) -> Response:
-        return self._request("POST", path, accept_status=(HTTPStatus.OK, HTTPStatus.CREATED), data=data)
+    def _post(self, path: str, data: Data = None, *, handled_status: Tuple[int] = ()) -> Response:
+        allow_status = (HTTPStatus.OK, HTTPStatus.CREATED) + handled_status
+        return self._request("POST", path, allow_status=allow_status, data=data)
 
     def _delete(self, path: str) -> Response:
-        return self._request("DELETE", path, accept_status=(HTTPStatus.OK,))
+        return self._request("DELETE", path, allow_status=(HTTPStatus.OK,))
 
     def _make_obj(self, model_cls, data: Union[Data, Response]) -> "WeevilsCore":
         if isinstance(data, Response):
@@ -72,17 +74,38 @@ class GitHost(WeevilsCore):
         self.private = data["private"]
 
     def _make_repository(self, path: str) -> "Repository":
-        resp = self._get(path)
+        resp = self._get(path, handled_status=(HTTPStatus.NOT_FOUND,))
         if resp.status_code == HTTPStatus.NOT_FOUND:
             raise EntityNotFound("Repository", path)
         return self._make_obj(Repository, resp)
 
     def repository(self, owner_name: str, name: str) -> "Repository":
+        """
+        Fetch a repository by the name of its owner and the repository name.
+
+        Note: repositories can be renamed on a git host, so consider using the weevils.io ID
+              instead via repository_by_id
+
+        :param owner_name:
+            The account name of the repository owner (user or organisation)
+        :param name:
+            The name of the repository itself
+        :return:
+            A Repository object model
+        """
         if None in (owner_name, name):
             raise ValueError("owner_name and name cannot be None")
         return self._make_repository(f"hosts/{self.slug}/repos/{owner_name}/{name}/")
 
     def repository_by_id(self, repository_id: UUID) -> "Repository":
+        """
+        Fetch a repository by its ID on weevils.io
+
+        :param repository_id:
+            The unique identifier of the repository on weevils
+        :return:
+            A Repository object model
+        """
         if repository_id is None:
             raise ValueError("reopsitory_id cannot be None")
         return self._make_repository(f"hosts/{self.slug}/repos/{repository_id}/")
