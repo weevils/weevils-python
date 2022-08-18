@@ -23,7 +23,7 @@ repos:
       - id: flake8
         args: [ --max-line-length=120, --extend-exclude='**/migrations/*.py' ]
   - repo: https://github.com/python/black
-    rev: 22.3.0
+    rev: 22.6.0
     hooks:
       - id: black
         args: [--safe, --line-length=120]
