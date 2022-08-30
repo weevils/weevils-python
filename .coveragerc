@@ -1,0 +1,8 @@
+[paths]
+source =
+    weevils
+
+[run]
+branch = true
+parallel = true
+source = weevils
