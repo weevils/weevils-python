@@ -4,7 +4,7 @@
 # modelled on github3.py
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, Optional, Union
 from urllib.parse import urljoin
 from uuid import UUID
 
@@ -23,27 +23,36 @@ class WeevilsCore(ABC):
         self._from_dict(data)
         self._data = data
 
-    def _request(self, method: str, path: str, allow_status=(), *, query: Data = None, data: Data = None) -> Response:
+    def _request(
+        self, method: str, path: str, *handled_status: Iterable[int], query: Data = None, data: Data = None
+    ) -> Response:
+
         url = urljoin(self._base_url, path.lstrip("/"))
+        if handled_status is None:
+            handled_status = ()
+
         try:
             resp = self._session.request(method, url, params=query, json=data)
         except ConnectionError as ex:
             raise WeevilsAPIConnectionError(self._base_url) from ex
 
-        if resp.status_code not in allow_status:
+        if resp.status_code not in handled_status:
             raise WeevilsAPIException(resp)
         return resp
 
-    def _get(self, path: str, query: Data = None, *, handled_status: Tuple[int] = ()) -> Response:
-        allow_status = (HTTPStatus.OK,) + handled_status
-        return self._request("GET", path, allow_status=allow_status, query=query)
+    def _get(self, path: str, query: Data = None, *handled_status: Iterable[int]) -> Response:
+        handled_status = (HTTPStatus.OK, HTTPStatus.NOT_FOUND) + (handled_status or ())
+        resp = self._request("GET", path, *handled_status, query=query)
+        if resp.status_code == HTTPStatus.NOT_FOUND:
+            raise EntityNotFound
+        return resp
 
-    def _post(self, path: str, data: Data = None, *, handled_status: Tuple[int] = ()) -> Response:
-        allow_status = (HTTPStatus.OK, HTTPStatus.CREATED) + handled_status
-        return self._request("POST", path, allow_status=allow_status, data=data)
+    def _post(self, path: str, *handled_status: Iterable[int], data: Data = None) -> Response:
+        handled_status = (HTTPStatus.OK, HTTPStatus.CREATED) + (handled_status or ())
+        return self._request("POST", path, *handled_status, data=data)
 
     def _delete(self, path: str) -> Response:
-        return self._request("DELETE", path, allow_status=(HTTPStatus.OK,))
+        return self._request("DELETE", path, HTTPStatus.OK)
 
     def _make_obj(self, model_cls, data: Union[Data, Response]) -> "WeevilsCore":
         if isinstance(data, Response):
@@ -73,12 +82,6 @@ class GitHost(WeevilsCore):
         self.slug = data["slug"]
         self.private = data["private"]
 
-    def _make_repository(self, path: str) -> "Repository":
-        resp = self._get(path, handled_status=(HTTPStatus.NOT_FOUND,))
-        if resp.status_code == HTTPStatus.NOT_FOUND:
-            raise EntityNotFound("Repository", path)
-        return self._make_obj(Repository, resp)
-
     def repository(self, owner_name: str, name: str) -> "Repository":
         """
         Fetch a repository by the name of its owner and the repository name.
@@ -95,7 +98,7 @@ class GitHost(WeevilsCore):
         """
         if None in (owner_name, name):
             raise ValueError("owner_name and name cannot be None")
-        return self._make_repository(f"hosts/{self.slug}/repos/{owner_name}/{name}/")
+        return self._make_obj(Repository, self._get(f"hosts/{self.slug}/repos/{owner_name}/{name}/"))
 
     def repository_by_id(self, repository_id: UUID) -> "Repository":
         """
@@ -107,8 +110,8 @@ class GitHost(WeevilsCore):
             A Repository object model
         """
         if repository_id is None:
-            raise ValueError("reopsitory_id cannot be None")
-        return self._make_repository(f"hosts/{self.slug}/repos/{repository_id}/")
+            raise ValueError("repository_id cannot be None")
+        return self._make_obj(Repository, self._get(f"hosts/{self.slug}/repos/{repository_id}/"))
 
 
 class Account(WeevilsCore):
@@ -118,6 +121,9 @@ class Account(WeevilsCore):
     def _from_dict(self, data: Data):
         self.id = UUID(data["id"])
         self.name = data["name"]
+
+    def list_repos(self) -> Iterable["Repository"]:
+        raise NotImplementedError
 
 
 class Repository(WeevilsCore):

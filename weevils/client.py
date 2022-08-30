@@ -114,7 +114,7 @@ class WeevilsClient(WeevilsCore):
             # TODO: some validation here to reject bad slugs before the server has to
             data["slug"] = slug
 
-        resp = self._post("weevils/", data=data, handled_status=(HTTPStatus.CONFLICT,))
+        resp = self._post("weevils/", HTTPStatus.CONFLICT, data=data)
         if resp.status_code == HTTPStatus.CONFLICT:
             raise EntityConflict(resp.json()["error"])
 
@@ -142,60 +142,6 @@ class WeevilsClient(WeevilsCore):
 
     def get_job(self, job_id: UUID) -> Job:
         return self._make_obj(Job, self._get(f"jobs/{job_id}/"))
-
-    # ---
-    # Repository methods
-    # ---
-
-    # TODO: figure out a nicer way to do method overloading?
-    #
-    # def get_repository_by_id(self, repository_id: UUID) -> Repository:
-    #     pass
-    #
-    # # TODO: make Repository and Weevil class with methods such as "watch"
-    #
-    # def get_repository_by_name(self, host: Union[str, UUID], owner_name: str, name: str) -> Repository:
-    #     """
-    #     Fetches the complete repository object on a given host by name and owner.
-    #
-    #     :param host:
-    #         Which host this repository is on - either as the host ID or the short name for public hosts
-    #         (eg 'github', 'bitbucket' etc)
-    #     :param owner_name:
-    #         The name of the user or organisation owning the repository
-    #     :param name:
-    #         The name of the repository
-    #     :return:
-    #         A Repository object containing all known information about the repository
-    #     """
-    #
-    # def watch_repository_by_id(self, repo_id: UUID, *, weevil_id: UUID = None):
-    #     pass
-    #
-    # def watch_repository_by_name(self, host: Union[str, UUID], owner_name: str, name: str, *, weevil_id: UUID = None):
-    #     """
-    #
-    #     :param host:
-    #         Which host this repository is on - either as the host ID or the short name for public hosts
-    #         (eg 'github', 'bitbucket' etc)
-    #     :param owner_name:
-    #         The name of the user or organisation owning the repository
-    #     :param name:
-    #         The name of the repository
-    #     :param weevil_id:
-    #         The ID of the weevil to watch the repository - if `None`, this will use the organisation default
-    #     :return:
-    #     """
-    #     repo = self.get_repository_by_name(host, owner_name, name, weevil_id=weevil_id)
-    #     return self.watch_repository_by_id(repo.id)
-
-    #
-    # # ----------------------
-    # # TODO
-    # def schedule(self, weevil_id: UUID):  # ...:
-    #     pass
-
-    # def watch(self. ###):
 
 
 class WeevilsSandboxClient(WeevilsClient):

@@ -15,10 +15,7 @@ class WeevilsAPIException(Exception):
 
 
 class EntityNotFound(Exception):
-    def __init__(self, entity_type: str, criteria: str):
-        super().__init__(f"Could not find entity of type {entity_type} with criteria {criteria}")
-        self.entity_type = entity_type
-        self.criteria = criteria
+    pass
 
 
 class EntityConflict(Exception):
