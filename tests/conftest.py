@@ -19,7 +19,6 @@ with Betamax.configure() as config:
 
 @pytest.fixture
 def client(betamax_session) -> WeevilsClient:
-
     # use the token in the recorded betamax tests - or if using a local weevils installation
     token = _API_TOKEN
     # if we are running a weevils system locally, we can point at it when running tests instead of relying on
