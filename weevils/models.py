@@ -26,7 +26,6 @@ class WeevilsCore(ABC):
     def _request(
         self, method: str, path: str, *handled_status: Iterable[int], query: Data = None, data: Data = None
     ) -> Response:
-
         url = urljoin(self._base_url, path.lstrip("/"))
         if handled_status is None:
             handled_status = ()
@@ -129,24 +128,28 @@ class Account(WeevilsCore):
 class Repository(WeevilsCore):
     id: UUID
     owner: Account
+    name: str
     host: GitHost
     private: bool
 
     def _from_dict(self, data: Data):
         self.id = UUID(data["id"])
         self.owner = self._make_obj(Account, data["owner"])
+        self.name = data["name"]
         self.host = self._make_obj(GitHost, data["host"])
         self.private = data["private"]
 
 
 class Job(WeevilsCore):
     id: UUID
+    number: int
     output: str
     status: Optional[str]
     repository: Repository
 
     def _from_dict(self, data: Data):
         self.id = UUID(data["id"])
+        self.number = data["number"]
         self.status = data["status"]
         self.output = data["output"]
         self.repository = self._make_obj(Repository, data["repository"])
