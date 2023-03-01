@@ -4,7 +4,7 @@
 # modelled on github3.py
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.parse import urljoin
 from uuid import UUID
 
@@ -177,6 +177,10 @@ class Weevil(WeevilsCore):
         self.name = data["name"]
         self.slug = data["slug"]
         self.script = data["script"]
+
+    def list_jobs(self) -> List[Job]:
+        jobs = self._get(f"weevils/{self.id}/jobs/").json()
+        return [self._make_obj(Job, job) for job in jobs]
 
     def run(self, repository: Union[UUID, Repository]) -> Job:
         if repository is None:
