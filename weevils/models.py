@@ -69,6 +69,15 @@ class WeevilsCore(ABC):
         return self._data
 
 
+class WeevilUser(WeevilsCore):
+    id: UUID
+    username: str
+
+    def _from_dict(self, data: Data):
+        self.id = UUID(data["id"])
+        self.username = data["username"]
+
+
 class GitHost(WeevilsCore):
     id: UUID
     name: str
