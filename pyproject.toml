@@ -1,10 +1,11 @@
 [tool.poetry]
 name = "weevils"
-version = "0.0.2a1"
+version = "0.0.2a2"
 license = "GPLv3"
 authors = ["weevils.io <code@weevils.io>"]
 homepage = "https://docs.weevils.io/api-client"
 description = ""
+readme = "README.md"
 packages = [{ include = "weevils/"}]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
@@ -12,6 +13,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
 ]
 include = [
