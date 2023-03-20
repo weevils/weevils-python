@@ -12,6 +12,11 @@ repos:
         args: [--fix=lf]
       # do not allow pdb/breakpoint statements to be checked in
       - id: debug-statements
+      # don't let dodgy file structures be checked in
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+        args: [--allow-multiple-documents]
   # code formatting
 #  - repo: https://github.com/PyCQA/prospector
 #    rev: v1.9.0
