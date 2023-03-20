@@ -7,7 +7,7 @@ import pkg_resources
 from requests.sessions import Session
 
 from .exceptions import EntityConflict, EntityNotFound, WeevilsAPIException
-from .models import GitHost, Job, Weevil, WeevilBase, WeevilsCore
+from .models import GitHost, Job, Weevil, WeevilBase, WeevilsCore, WeevilUser
 
 VERSION = pkg_resources.get_distribution("weevils").version
 
@@ -64,6 +64,13 @@ class WeevilsClient(WeevilsCore):
     def _from_dict(self, _):
         # nothing to implement here, just required for ABC compliance
         pass
+
+    # ---
+    # Account methods
+    # ---
+
+    def get_account_info(self) -> WeevilUser:
+        return self._make_obj(WeevilUser, self._get("account/me/"))
 
     # ---
     # Host methods
