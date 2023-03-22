@@ -149,12 +149,29 @@ class Repository(WeevilsCore):
         self.private = data["private"]
 
 
+class Artifact(WeevilsCore):
+    id: UUID
+    path: str
+    mimetype: str
+    download_url: str
+
+    def _from_dict(self, data: Data):
+        self.id = UUID(data["id"])
+        self.path = data["path"]
+        self.mimetype = data["mimetype"]
+        self.download_url = data["download_url"]
+
+    def load(self) -> Response:
+        return self._session.request("GET", self.download_url, stream=True)
+
+
 class Job(WeevilsCore):
     id: UUID
     number: int
     output: str
     status: Optional[str]
     repository: Repository
+    artifacts: List[Artifact]
 
     def _from_dict(self, data: Data):
         self.id = UUID(data["id"])
@@ -162,6 +179,7 @@ class Job(WeevilsCore):
         self.status = data["status"]
         self.output = data["output"]
         self.repository = self._make_obj(Repository, data["repository"])
+        self.artifacts = [self._make_obj(Artifact, art) for art in data["artifacts"]]
 
 
 class WeevilBase(WeevilsCore):

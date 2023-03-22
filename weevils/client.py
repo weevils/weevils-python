@@ -7,7 +7,7 @@ import pkg_resources
 from requests.sessions import Session
 
 from .exceptions import EntityConflict, EntityNotFound, WeevilsAPIException
-from .models import GitHost, Job, Weevil, WeevilBase, WeevilsCore, WeevilUser
+from .models import Artifact, GitHost, Job, Weevil, WeevilBase, WeevilsCore, WeevilUser
 
 VERSION = pkg_resources.get_distribution("weevils").version
 
@@ -149,6 +149,9 @@ class WeevilsClient(WeevilsCore):
 
     def get_job(self, job_id: UUID) -> Job:
         return self._make_obj(Job, self._get(f"jobs/{job_id}/"))
+
+    def get_artifact(self, artifact_id: UUID) -> Artifact:
+        return self._make_obj(Artifact, self._get(f"artifacts/{artifact_id}/"))
 
 
 class WeevilsSandboxClient(WeevilsClient):
