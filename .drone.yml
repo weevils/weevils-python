@@ -38,6 +38,23 @@ steps:
     depends_on:
       - test
 
+  - name: upload
+    <<: *base
+    environment:
+      UPLOAD_KEY:
+        from_secret: pypi-push
+    commands:
+      - echo "${UPLOAD_KEY}" > key && chown 0600 key
+      - rm -rf dist/ && poetry build
+      - sed -i "s/version = \"\(.*\)\"/version = \"\1-$(date +%Y%m%d%H%M)\"/" pyproject.toml
+      - ssh -i key pypi@pypi.zerfeciz.com mkdir -p packages/weevils-python/
+      - scp -i key pypi@pypi.zerfeciz.com:packages/weevils-python/
+    depends_on:
+      - lint
+    when:
+      branch:
+        - master
+
 volumes:
   - name: venv
     temp: {}
