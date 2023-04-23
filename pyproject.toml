@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "weevils"
-version = "0.0.2a2"
+version = "0.1"
 license = "GPLv3"
 authors = ["weevils.io <code@weevils.io>"]
 homepage = "https://docs.weevils.io/api-client"
