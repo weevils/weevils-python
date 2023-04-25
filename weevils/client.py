@@ -7,7 +7,16 @@ import pkg_resources
 from requests.sessions import Session
 
 from .exceptions import EntityConflict, EntityNotFound, WeevilsAPIException
-from .models import Artifact, GitHost, Job, Weevil, WeevilBase, WeevilsCore, WeevilUser
+from .models import (
+    Artifact,
+    GitHost,
+    GitHostApp,
+    Job,
+    Weevil,
+    WeevilBase,
+    WeevilsCore,
+    WeevilUser,
+)
 
 VERSION = pkg_resources.get_distribution("weevils").version
 
@@ -109,6 +118,18 @@ class WeevilsClient(WeevilsCore):
         if self._bitbucket is None:
             self._bitbucket = self.get_host("bitbucket")
         return self._bitbucket
+
+    # ---
+    # App methods
+    # ---
+
+    def list_apps(self) -> List[GitHostApp]:
+        apps = self._get("apps/").json()
+        return [self._make_obj(GitHostApp, data) for data in apps]
+
+    def get_app(self, app_id: str) -> GitHostApp:
+        app = self._get(f"apps/{app_id}/").json()
+        return self._make_obj(GitHostApp, app)
 
     # ---
     # Weevil methods

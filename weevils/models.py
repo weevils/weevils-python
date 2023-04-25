@@ -69,15 +69,6 @@ class WeevilsCore(ABC):
         return self._data
 
 
-class WeevilUser(WeevilsCore):
-    id: UUID
-    username: str
-
-    def _from_dict(self, data: Data):
-        self.id = UUID(data["id"])
-        self.username = data["username"]
-
-
 class GitHost(WeevilsCore):
     id: UUID
     name: str
@@ -122,13 +113,28 @@ class GitHost(WeevilsCore):
         return self._make_obj(Repository, self._get(f"hosts/{self.slug}/repos/{repository_id}/"))
 
 
-class Account(WeevilsCore):
+class GitHostApp(WeevilsCore):
     id: UUID
     name: str
+    host: GitHost
+    authorization_url: str
 
     def _from_dict(self, data: Data):
         self.id = UUID(data["id"])
         self.name = data["name"]
+        self.host = GitHost(data["host"], self)
+        self.authorization_url = data["authorization_url"]
+
+
+class Account(WeevilsCore):
+    id: UUID
+    name: str
+    host: GitHost
+
+    def _from_dict(self, data: Data):
+        self.id = UUID(data["id"])
+        self.name = data["name"]
+        self.host = self._make_obj(GitHost, data["host"])
 
     def list_repos(self) -> Iterable["Repository"]:
         raise NotImplementedError
@@ -218,3 +224,14 @@ class Weevil(WeevilsCore):
 
     def watch(self, repository_id: UUID):
         pass
+
+
+class WeevilUser(WeevilsCore):
+    id: UUID
+    display_name: str
+    accounts: List[Account]
+
+    def _from_dict(self, data: Data):
+        self.id = UUID(data["id"])
+        self.display_name = data["display_name"]
+        self.accounts = [self._make_obj(Account, acc) for acc in data["accounts"]]
