@@ -25,14 +25,14 @@ steps:
     commands:
       # run the tests
       - /venv/bin/pytest --cov=weevils/
-      # needed because newer versions of git moan about the checkout ownership
-      - git config --global --add safe.directory /drone/src
     depends_on:
       - prepare
 
   - name: lint
     <<: *base
     commands:
+      # needed because newer versions of git moan about the checkout ownership
+      - git config --global --add safe.directory /drone/src
       # ensure that the pre-commit steps were run
       - /venv/bin/pre-commit run --all
     depends_on:
