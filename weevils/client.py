@@ -1,9 +1,9 @@
 import sys
 from http import HTTPStatus
+from importlib.metadata import version
 from typing import List, Union
 from uuid import UUID
 
-import pkg_resources
 from requests.sessions import Session
 
 from .exceptions import EntityConflict, EntityNotFound, WeevilsAPIException
@@ -18,7 +18,7 @@ from .models import (
     WeevilUser,
 )
 
-VERSION = pkg_resources.get_distribution("weevils").version
+VERSION = str(version("weevils"))
 
 _python_version = ".".join(str(v) for v in sys.version_info[:2])
 DEFAULT_USER_AGENT = f"Weevils Client v{VERSION} ({_python_version})"
