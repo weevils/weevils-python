@@ -1,0 +1,16 @@
+from typing import List
+from uuid import UUID
+
+from ..dtos import Account
+from ._client_base import ClientBase
+
+
+class AccountClient(ClientBase):
+    DTO_CLASS = Account
+
+    def get(self, account_id: UUID) -> Account:
+        return self._get(f"/account/{account_id}")
+
+    def list(self, offset: int = 0, limit: int = 100) -> List[Account]:
+        query = {"limit": limit, "offset": offset}
+        return self._list("/account/", query)
