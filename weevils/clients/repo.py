@@ -1,16 +1,31 @@
+from typing import List
 from uuid import UUID
 
-from ..dtos import Job
-from ._client_base import ClientBase
+from ..client_base import ClientBase
+from ..dtos import Repository
 
 
-class RepoClient(ClientBase):
-    def get_by_id(self, job_id: UUID, host_id: UUID = None) -> Job:
-        pass
+class RepositoriesClient(ClientBase):
+    DTO_CLASS = Repository
 
-    def get_by_name(self, account_name: str, repo_name: str, host_id: UUID = None) -> Job:
-        ...
+    def get(self, repo_id: UUID) -> Repository:
+        return self._get(f"/repo/{repo_id}/")
 
-    def get(self, *, job_id: UUID = None, account_name: str = None, repo_name: str = None, host_id: UUID = None) -> Job:
-        if job_id is not None:
-            return self.get_by_id(job_id, host_id=host_id)
+    def list(self) -> List[Repository]:
+        return self._list("/repo/")
+
+
+class HostRepositoriesClient(RepositoriesClient):
+    def __init__(self, *args, host_id: UUID = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        # if this is being used as part of a Host Instance Client, we will always filter based on host
+        self._host_id = host_id
+
+    def get_by_name(self, owner_name: str, name: str) -> Repository:
+        return self._get(f"/host/{self._host_id}/repo/{owner_name}/{name}/")
+
+    def get(self, repo_id: UUID) -> Repository:
+        return self._get(f"/repo/{repo_id}/", {"host_id": self._host_id})
+
+    def list(self) -> List[Repository]:
+        return self._list(f"/host/{self._host_id}/repo/")

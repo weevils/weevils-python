@@ -3,6 +3,15 @@ from urllib.parse import urlparse
 from requests import Response
 
 
+class WeevilsConfigurationError(Exception):
+    pass
+
+
+# ---
+# HTTP Exceptions
+# ---
+
+
 class BaseResponseException(Exception):
     """
     Common base exception
@@ -94,6 +103,7 @@ class EntityNotFound(BaseResponseException):
 
 
 __all__ = (
+    "WeevilsConfigurationError",
     "UnhandledResponse",
     "EntityNotFound",
     "ActionDisallowed",

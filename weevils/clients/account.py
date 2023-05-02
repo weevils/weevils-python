@@ -1,8 +1,8 @@
 from typing import List
 from uuid import UUID
 
+from ..client_base import ClientBase
 from ..dtos import Account
-from ._client_base import ClientBase
 
 
 class AccountClient(ClientBase):

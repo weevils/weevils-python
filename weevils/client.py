@@ -1,27 +1,35 @@
 from functools import cached_property
+from typing import Union
+from uuid import UUID
 
-from .clients._client_base import ClientBase, client_factory  # noqa
+from .client_base import ClientBase, client_factory  # noqa
 from .clients.account import AccountClient
 from .clients.base_image import BaseImageClient
-from .clients.host import GitHostClient
+from .clients.host import GitHostInstanceClient, GitHostsClient
+from .clients.host_app import GitHostAppClient
 from .clients.job import JobClient
-from .dtos import WeevilUser
+from .clients.repo import RepositoriesClient
+from .dtos import WeevilsUser
 
 
 class WeevilsClient(ClientBase):
-    # repo = _make_client()
-    # host_app = _make_client()
+    repos = client_factory(RepositoriesClient)
     # weevil = _make_client()
-    account = client_factory(AccountClient)
-    host: GitHostClient = client_factory(GitHostClient)
-    job: JobClient = client_factory(JobClient)
-    base: BaseImageClient = client_factory(BaseImageClient)
+    apps = client_factory(GitHostAppClient)
+    accounts = client_factory(AccountClient)
+    hosts: GitHostsClient = client_factory(GitHostsClient)
+    jobs: JobClient = client_factory(JobClient)
+    bases: BaseImageClient = client_factory(BaseImageClient)
+
+    def host(self, host_id_or_slug: Union[str, UUID]) -> GitHostInstanceClient:
+        host = self.hosts.get(host_id_or_slug)
+        return self._make_client(GitHostInstanceClient, dto=host)
 
     # shorthands:
     @property
-    def me(self) -> WeevilUser:
-        return self._get("/account/me/", dto_class=WeevilUser)
+    def me(self) -> WeevilsUser:
+        return self._get("/account/me/", dto_class=WeevilsUser)
 
     @cached_property
-    def github(self):
-        return self.host.get("github")
+    def github(self) -> GitHostInstanceClient:
+        return self.host("github")

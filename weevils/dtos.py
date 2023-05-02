@@ -27,10 +27,37 @@ class GitHost(ResourceMixin):
 @dataclass(eq=False)
 class Account(ResourceMixin):
     id: UUID
-    display_name: str
+    name: str
+    host: GitHost
 
     def __post_init__(self):
         super().__post_init__()
+        self.host = GitHost(**self.host)
+
+
+@dataclass(eq=False)
+class GitHostApp(ResourceMixin):
+    id: UUID
+    name: str
+    host: GitHost
+    authorization_url: str
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.host = GitHost(**self.host)
+
+
+@dataclass(eq=False)
+class Repository(ResourceMixin):
+    id: UUID
+    owner: Account
+    name: str
+    host: GitHost
+    private: bool
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.owner = Account(**self.owner)
         self.host = GitHost(**self.host)
 
 
@@ -56,7 +83,7 @@ class Job(ResourceMixin):
 
 
 @dataclass(eq=False)
-class WeevilUser(ResourceMixin):
+class WeevilsUser(ResourceMixin):
     id: UUID
     display_name: str
     accounts: List[Account]
