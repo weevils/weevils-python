@@ -10,7 +10,7 @@ from .jobs import WeevilJobsClient
 class WeevilsClient(ClientBase):
     DTO_CLASS = Weevil
 
-    def get(self, weevil_id: UUID) -> Weevil:
+    def get(self, weevil_id: Union[str, UUID]) -> Weevil:
         return self._get(f"/weevils/{weevil_id}/")
 
     def list(self) -> List[Weevil]:
@@ -38,3 +38,6 @@ class WeevilInstanceClient(InstanceClient):
     @property
     def jobs(self):
         return self._make_client(WeevilJobsClient, weevil_id=self.id)
+
+    def update(self, script: str) -> Weevil:
+        return self._update(f"/weevils/{self.id}/", data={"script": script})

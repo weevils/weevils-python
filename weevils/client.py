@@ -10,7 +10,7 @@ from .clients.host_app import GitHostAppClient
 from .clients.jobs import JobsClient
 from .clients.repo import RepositoriesClient
 from .clients.weevils import WeevilInstanceClient, WeevilsClient
-from .dtos import WeevilsUser
+from .dtos import Weevil, WeevilsUser
 
 
 class WeevilsAPI(ClientBase):
@@ -27,7 +27,8 @@ class WeevilsAPI(ClientBase):
     # Other weevils plumbing:
     apps: GitHostAppClient = client_factory(GitHostAppClient)
 
-    def weevil(self, weevil_id: UUID) -> WeevilInstanceClient:
+    def weevil(self, weevil: Union[str, UUID, Weevil]) -> WeevilInstanceClient:
+        weevil_id = weevil.id if isinstance(weevil, Weevil) else weevil
         weevil = self.weevils.get(weevil_id)
         return self._make_client(WeevilInstanceClient, dto=weevil)
 
