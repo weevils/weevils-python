@@ -10,10 +10,10 @@ class GitHostAppClient(ClientBase):
 
     def create(self, host_id: UUID, name: str, client_id: str, client_secret: str):
         data = {"host_id": str(host_id), "name": name, "client_id": client_id, "client_secret": client_secret}
-        return self._create("/host_app/", data)
+        return self._create("/apps/", data)
 
     def list(self) -> List[GitHostApp]:
-        return self._list("/host_app/")
+        return self._list("/apps/")
 
     def get(self, app_id: UUID) -> List[GitHostApp]:
-        return self._get(f"/host_app/{app_id}/")
+        return self._get(f"/apps/{app_id}/")

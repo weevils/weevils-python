@@ -41,7 +41,7 @@ WEEVILS_SANDBOX_API = "https://api.sandbox.weevils.io"
 # ---
 # Utils
 # ---
-def client_factory(client_cls: Type[Client], **kwargs) -> Client:
+def client_factory(client_cls: Type[Client], **kwargs) -> cached_property[Client]:
     deferred = partial(ClientBase._make_client, client_cls=client_cls, **kwargs)
     return cached_property(deferred)
 

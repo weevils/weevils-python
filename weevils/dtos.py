@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 
@@ -73,8 +73,36 @@ class BaseImage(ResourceMixin):
     slug: str
 
 
+@dataclass(eq=False)
+class Weevil(ResourceMixin):
+    id: UUID
+    name: str
+    slug: str
+    script: str
+
+
+@dataclass(eq=False)
+class Artifact(ResourceMixin):
+    id: UUID
+    path: str
+    mimetype: str
+    url: str
+
+
+@dataclass(eq=False)
 class Job(ResourceMixin):
-    pass
+    id: UUID
+    number: int
+    output: str
+    artifacts: List[Artifact]
+    repository: Repository
+    status: Optional[str] = None
+    failure_reason: Optional[str] = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.artifacts = [Artifact(**art) for art in self.artifacts]
+        self.repository = Repository(**self.repository)
 
 
 # ---

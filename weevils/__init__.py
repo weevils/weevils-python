@@ -1,11 +1,11 @@
 import os
 
-from .client import WeevilsClient
+from .client import WeevilsAPI
 from .client_base import WEEVILS_API
 from .exceptions import WeevilsConfigurationError
 
 
-def from_env() -> WeevilsClient:
+def from_env() -> WeevilsAPI:
     token = os.environ.get("WEEVILS_API_TOKEN")
     if token is None:
         raise WeevilsConfigurationError(
@@ -14,7 +14,7 @@ def from_env() -> WeevilsClient:
         )
 
     api_url = os.environ.get("WEEVILS_API_URL") or WEEVILS_API
-    return WeevilsClient(token, base_url=api_url)
+    return WeevilsAPI(token, base_url=api_url)
 
 
-__all__ = ("WeevilsClient",)
+__all__ = ("WeevilsAPI",)

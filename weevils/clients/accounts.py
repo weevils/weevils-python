@@ -5,7 +5,7 @@ from ..client_base import ClientBase
 from ..dtos import Account
 
 
-class AccountClient(ClientBase):
+class AccountsClient(ClientBase):
     DTO_CLASS = Account
 
     def get(self, account_id: UUID) -> Account:

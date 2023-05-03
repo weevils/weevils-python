@@ -18,7 +18,6 @@ class BaseResponseException(Exception):
     """
 
     def __init__(self, response: Response, message=None):
-        super().__init__(message)
         self.response = response
 
         if response is not None:
@@ -30,6 +29,9 @@ class BaseResponseException(Exception):
                     self.detail = data.get("detail", "[no detail]")
                 else:
                     self.detail = data
+
+        message = message or self.detail
+        super().__init__(message)
 
 
 class UnhandledResponse(BaseResponseException):
@@ -97,9 +99,11 @@ class EntityNotFound(BaseResponseException):
     Generic error message to throw when a service responds to a request to a resource with a 404
     """
 
-    def __init__(self, dto_class, response):
-        parsed = urlparse(response.url)
-        super().__init__(response, f"{dto_class} {parsed.path}")
+    def __init__(self, dto_class, response=None, message: str = None):
+        if response is not None:
+            parsed = urlparse(response.url)
+            message = f"{dto_class} {parsed.path}"
+        super().__init__(response, message)
 
 
 __all__ = (
