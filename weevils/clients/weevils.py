@@ -16,7 +16,7 @@ class WeevilsClient(ClientBase):
     def list(self) -> List[Weevil]:
         return self._list("/weevils/")
 
-    def update(self, weevil_id: Union[str | UUID], script: str) -> Weevil:
+    def update(self, weevil_id: Union[str, UUID], script: str) -> Weevil:
         return super()._update(f"/weevils/{weevil_id}/", data={"script": script})
 
     def create(self, base: Union[str, UUID, BaseImage], name: str, script: str, *, slug: str = None) -> Weevil:
