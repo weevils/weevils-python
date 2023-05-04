@@ -86,7 +86,7 @@ class Artifact(ResourceMixin):
     id: UUID
     path: str
     mimetype: str
-    url: str
+    download_url: str
 
 
 @dataclass(eq=False)

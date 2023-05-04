@@ -7,7 +7,7 @@ from .clients.accounts import AccountsClient
 from .clients.base_image import BaseImagesClient
 from .clients.host import GitHostInstanceClient, GitHostsClient
 from .clients.host_app import GitHostAppClient
-from .clients.jobs import JobsClient
+from .clients.jobs import ArtifactsClient, JobsClient
 from .clients.repo import RepositoriesClient
 from .clients.weevils import WeevilInstanceClient, WeevilsClient
 from .dtos import Weevil, WeevilsUser
@@ -23,6 +23,7 @@ class WeevilsAPI(ClientBase):
     bases: BaseImagesClient = client_factory(BaseImagesClient)
     weevils: WeevilsClient = client_factory(WeevilsClient)
     jobs: JobsClient = client_factory(JobsClient)
+    artifacts: ArtifactsClient = client_factory(ArtifactsClient)
 
     # Other weevils plumbing:
     apps: GitHostAppClient = client_factory(GitHostAppClient)

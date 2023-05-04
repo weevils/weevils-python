@@ -1,8 +1,11 @@
-from typing import List
+from typing import List, Union
+from urllib.parse import urlparse
 from uuid import UUID
 
+from requests import Response
+
 from ..client_base import ClientBase
-from ..dtos import Job
+from ..dtos import Artifact, Job
 
 
 class JobsClient(ClientBase):
@@ -24,6 +27,18 @@ class JobsClient(ClientBase):
         if repository_id:
             query["repository_id"] = str(repository_id)
         return self._list("/jobs/", query)
+
+
+class ArtifactsClient(ClientBase):
+    DTO_CLASS = Artifact
+
+    def get(self, artifact_id: Union[str, UUID]) -> Artifact:
+        return self._get(f"/artifacts/{artifact_id}/")
+
+    def stream(self, artifact_id: Union[str, UUID]) -> Response:
+        art = self.get(artifact_id)
+        path = urlparse(art.download_url).path
+        return self._request("GET", path, stream=True)
 
 
 class WeevilJobsClient(JobsClient):
