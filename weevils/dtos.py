@@ -54,6 +54,7 @@ class Repository(ResourceMixin):
     name: str
     host: GitHost
     private: bool
+    url_on_host: str
 
     def __post_init__(self):
         super().__post_init__()
@@ -79,6 +80,7 @@ class Weevil(ResourceMixin):
     name: str
     slug: str
     script: str
+    build_status: str
 
 
 @dataclass(eq=False)
